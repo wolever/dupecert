@@ -35,10 +35,9 @@ def sign(ca, cert):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ca", type=file,
-                        default="ca/cakey.pem",
+                        default="cakey.pem",
                         help="The CA's key, in PEM format.")
-    parser.add_argument("--ca-pass", default="asdf",
-                        help="passphrase for CA")
+    parser.add_argument("--ca-pass", default='', help="passphrase for CA")
     parser.add_argument("--cert", type=file,
                         default="facebook.pem",
                         help="The certificate to duplicate, in PEM format.")
