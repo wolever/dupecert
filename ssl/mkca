@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+if [[ ! "$1" ]]; then
+    echo "usage: $0 name"
+    exit 2
+fi
+
+name="$1"
+
+if [[ -d "$name" ]]; then
+    echo "error: $name/ exists"
+    exit 1
+fi
+
+mkdir "$name"
+cp openssl.default.cfg "$name/openssl.cfg"
+openssl req -new -x509 -extensions v3_ca \
+            -keyout "$name/tmp.cakey.key" \
+            -out "$name/tmp.cakey.crt" \
+            -subj "/CN=$name" \
+            -days 7300 \
+            -config "$name/openssl.cfg"
+echo "Removing passphrase..."
+openssl rsa -in "$name/tmp.cakey.key" -out "$name/cakey.pem"
+cat "$name/tmp.cakey.crt" >> "$name/cakey.pem"
+rm "$name/"tmp.*
+#openssl pkcs12 -export -in "$name/cakey.pem" -out "$name/cakey.p12"
+mkdir "$name/certs"
+mkdir "$name/database"
+echo '0001' > "$name/serial"
+#echo "Put your passphrase in '$name/passphrase' to get a reminder"
+#echo "when 'mkcert' is run."

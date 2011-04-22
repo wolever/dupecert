@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+if [[ $# -ne 2 ]]; then
+    echo "usage: $0 ca keyname"
+    exit 2
+fi
+
+ca="$1"
+keyname="$2"
+
+if [[ ! -d "$ca" ]]; then
+    echo "error: can't find $ca/"
+    exit 1
+fi
+
+cd "$ca/"
+
+echo "--- creating key ---"
+openssl req -new -config ./openssl.cfg \
+            -subj "/CN=$keyname" \
+            -nodes -out "$keyname-temp-req.pem" \
+            -keyout "$keyname-temp-private.pem"
+
+if [[ -f "passphrase" ]]; then
+    echo "=========="
+    echo "PASSWORD: `cat passphrase`"
+    echo "=========="
+fi
+
+openssl ca -config ./openssl.cfg \
+           -out "$keyname-temp-cert.pem" \
+           -infiles "$keyname-temp-req.pem"
+
+cat "$keyname-temp-cert.pem" "$keyname-temp-private.pem" > "$keyname.pem"
+rm "$keyname-temp-"*
+mv "$keyname.pem" "certs/"
+echo "$ca/certs/$keyname.pem created."

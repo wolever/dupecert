@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env python
 # HTTPSERVERS
 # by Petko D. (pdp) Petkov
 # GNUCITIZEN(http://www.gnucitizen.org)
