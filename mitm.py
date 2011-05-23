@@ -39,8 +39,8 @@ class sslmitm(object):
         ctx = SSL.Context(SSL.SSLv23_METHOD)
 
         if cert_key is not None:
-            ctx.use_certificate(cert_key)
-            ctx.use_privatekey(cert_key.get_pubkey())
+            ctx.use_certificate_file("cakey.pem")
+            ctx.use_privatekey_file("cakey.pem")
             ctx.check_privatekey()
 
         # Don't verify the peer's certificate... Who would MITM us?

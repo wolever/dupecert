@@ -154,6 +154,7 @@ class ConnectionHandler:
         self.target.connect(address)
 
     def _read_write(self):
+        from OpenSSL import SSL
         time_out_max = self.timeout/3
         socs = [self.client, self.target]
         count = 0
@@ -162,16 +163,19 @@ class ConnectionHandler:
             (recv, _, error) = select.select(socs, [], socs, 3)
             if error:
                 break
-            if recv:
-                for in_ in recv:
-                    data = in_.recv(BUFLEN)
-                    if in_ is self.client:
-                        out = self.target
-                    else:
-                        out = self.client
-                    if data:
-                        out.send(data)
-                        count = 0
+            try:
+                if recv:
+                    for in_ in recv:
+                        data = in_.recv(BUFLEN)
+                        if in_ is self.client:
+                            out = self.target
+                        else:
+                            out = self.client
+                        if data:
+                            out.send(data)
+                            count = 0
+            except SSL.ZeroReturnError:
+                break
             if count == time_out_max:
                 break
 
