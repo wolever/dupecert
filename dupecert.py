@@ -7,6 +7,7 @@ PEM = crypto.FILETYPE_PEM
 # see: http://docs.ganeti.org/ganeti/master/html/design-x509-ca.html
 
 def get_extension(cert, short_name, default=None):
+    return None
     for i in range(cert.get_extension_count()):
         extension = cert.get_extension(i)
         if extension.get_short_name() == short_name:
