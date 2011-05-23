@@ -4,14 +4,14 @@ import dupecert
 
 
 class sslmitm(object):
-    def __init__(self, ca, victim_plain, server_plain):
+    def __init__(self, ca_cert, ca_key, victim_plain, server_plain):
         """ MITMs the connection between 'victim' and 'server'. The '.victim'
             and '.server' properties are secure sockets for the victim and
             server respectively.
 
             For example:
 
-            >>> mitm = sslmitm(ca, victim_plain, server_plain)
+            >>> mitm = sslmitm(ca_cert, ca_key, victim_plain, server_plain)
             >>> data = mitm.victim.recv(1024)
             >>> print data
             GET / HTTP/1.1
@@ -28,7 +28,8 @@ class sslmitm(object):
                 to the victim's machine.
             server_plain: a plain socket connected to the server we're
                 going to impersonate. """
-        self.ca = ca
+        self.ca_cert = ca_cert
+        self.ca_key = ca_key
         self.victim_plain = victim_plain
         self.server_plain = server_plain
         self._started = False
@@ -57,7 +58,8 @@ class sslmitm(object):
         server.set_connect_state()
         server.do_handshake()
 
-        fake_cert_pkey = dupecert.dupe(self.ca, server.get_peer_certificate())
+        fake_cert_pkey = dupecert.dupe(self.ca_cert, self.ca_key,
+                                       server.get_peer_certificate())
 
         victim = SSL.Connection(self._mk_ctx(cert_pkey=fake_cert_pkey),
                                 self.victim_plain)

@@ -136,9 +136,11 @@ class ConnectionHandler:
     def _start_mitm(self):
         from mitm import sslmitm
         from OpenSSL import crypto
-        ca = crypto.load_privatekey(crypto.FILETYPE_PEM,
-                                    open("cakey.pem").read())
-        mitm = sslmitm(ca, self.client, self.target)
+        ca_key = crypto.load_privatekey(crypto.FILETYPE_PEM,
+                                        open("cakey.pem").read())
+        ca_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
+                                          open("cakey.pem").read())
+        mitm = sslmitm(ca_cert, ca_key, self.client, self.target)
         self.target = mitm.server
         self.client = mitm.victim
 

@@ -1,1 +1,1 @@
-curl -k -vvvv --proxy localhost:6391 'https://encrypted.google.com/'
+curl -k -vvvv --proxy localhost:6391 --cacert cakey.pem 'https://facebook.com/'

@@ -17,12 +17,20 @@ def get_extension(cert, short_name, default=None):
             return extension
     return default
 
-def dupe(ca, cert):
+import time
+_serial = int(time.time())
+def next_serial():
+    global _serial
+    _serial += 1
+    return _serial
+
+def dupe(ca_cert, ca_key, cert):
     dst = crypto.X509()
-    dst.set_serial_number(1337)
+    dst.set_serial_number(next_serial())
     dst.gmtime_adj_notBefore(0)
     dst.gmtime_adj_notAfter(60*60*24*360)
     dst.set_subject(cert.get_subject())
+    dst.set_issuer(ca_cert.get_subject())
     alt_name = get_extension(cert, "subjectAltName")
     if alt_name is not None:
         dst.add_extensions([ alt_name ])
@@ -31,7 +39,7 @@ def dupe(ca, cert):
     key.generate_key(crypto.TYPE_RSA, 1024)
     dst.set_pubkey(key)
 
-    dst.sign(ca, "sha1")
+    dst.sign(ca_key, "sha1")
     
     return dst, key
 
@@ -50,10 +58,12 @@ def parse_args():
 def main():
     args = parse_args()
 
-    ca = crypto.load_privatekey(PEM, args.ca.read(), args.ca_pass)
+    ca_pem = args.ca.read()
+    ca_key = crypto.load_privatekey(PEM, ca_pem, args.ca_pass)
+    ca_cert = crypto.load_certificate(PEM, ca_pem)
     cert = crypto.load_certificate(PEM, args.cert.read())
 
-    new_cert, new_pkey = dupe(ca, cert)
+    new_cert, new_pkey = dupe(ca_cert, ca_key, cert)
     print crypto.dump_certificate(PEM, new_cert)
     print crypto.dump_privatekey(PEM, new_pkey)
 
