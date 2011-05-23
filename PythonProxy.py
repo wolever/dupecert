@@ -1,4 +1,5 @@
-# -*- coding: cp1252 -*-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 # <PythonProxy.py>
 #
 #Copyright (c) <2009> <Fábio Domingues - fnds3000 in gmail.com>
@@ -174,6 +175,7 @@ class ConnectionHandler:
                         if data:
                             out.send(data)
                             count = 0
+            # TODO: Check for Need{Read,Write} and handle appropriately
             except SSL.ZeroReturnError:
                 break
             if count == time_out_max:
