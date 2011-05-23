@@ -14,12 +14,12 @@ def get_extension(cert, short_name, default=None):
             return extension
     return default
 
-def dupe(cert):
+def dupe(ca, cert):
     dst = crypto.X509()
-    dst.set_subject(cert.get_subject())
     dst.set_serial_number(1337)
     dst.gmtime_adj_notBefore(0)
     dst.gmtime_adj_notAfter(60*60*24*360)
+    dst.set_subject(cert.get_subject())
     alt_name = get_extension(cert, "subjectAltName")
     if alt_name is not None:
         dst.add_extensions([ alt_name ])
@@ -27,11 +27,10 @@ def dupe(cert):
     key = crypto.PKey()
     key.generate_key(crypto.TYPE_RSA, 1024)
     dst.set_pubkey(key)
-    
-    return dst
 
-def sign(ca, cert):
-    cert.sign(ca, "sha1")
+    dst.sign(ca, "sha1")
+    
+    return dst, key
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -51,10 +50,9 @@ def main():
     ca = crypto.load_privatekey(PEM, args.ca.read(), args.ca_pass)
     cert = crypto.load_certificate(PEM, args.cert.read())
 
-    new = dupe(cert)
-    sign(ca, new)
-    print crypto.dump_certificate(PEM, new)
-    print crypto.dump_privatekey(PEM, new.get_pubkey())
+    new_cert, new_pkey = dupe(ca, cert)
+    print crypto.dump_certificate(PEM, new_cert)
+    print crypto.dump_privatekey(PEM, new_pkey)
 
 if __name__ == "__main__":
     main()

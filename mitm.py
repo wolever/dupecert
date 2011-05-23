@@ -35,12 +35,13 @@ class sslmitm(object):
         self._start_mitm()
 
     @staticmethod
-    def _mk_ctx(cert_key=None):
+    def _mk_ctx(cert_pkey=None):
         ctx = SSL.Context(SSL.SSLv23_METHOD)
 
-        if cert_key is not None:
-            ctx.use_certificate_file("cakey.pem")
-            ctx.use_privatekey_file("cakey.pem")
+        if cert_pkey is not None:
+            cert, pkey = cert_pkey
+            ctx.use_certificate(cert)
+            ctx.use_privatekey(pkey)
             ctx.check_privatekey()
 
         # Don't verify the peer's certificate... Who would MITM us?
@@ -56,10 +57,9 @@ class sslmitm(object):
         server.set_connect_state()
         server.do_handshake()
 
-        fake_cert = dupecert.dupe(server.get_peer_certificate())
-        dupecert.sign(self.ca, fake_cert)
+        fake_cert_pkey = dupecert.dupe(self.ca, server.get_peer_certificate())
 
-        victim = SSL.Connection(self._mk_ctx(cert_key=fake_cert),
+        victim = SSL.Connection(self._mk_ctx(cert_pkey=fake_cert_pkey),
                                 self.victim_plain)
         victim.set_accept_state()
         victim.do_handshake()
