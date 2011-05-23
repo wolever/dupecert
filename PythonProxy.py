@@ -187,7 +187,8 @@ def start_server(host='localhost', port=6391, IPv6=False, timeout=60,
     print "Serving on %s:%d."%(host, port)#debug
     soc.listen(0)
     while 1:
-        thread.start_new_thread(handler, soc.accept()+(timeout,))
+        handler(*(soc.accept() + (timeout, )))
+        #thread.start_new_thread(handler, soc.accept()+(timeout,))
 
 if __name__ == '__main__':
     start_server()
