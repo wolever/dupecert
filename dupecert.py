@@ -7,7 +7,10 @@ PEM = crypto.FILETYPE_PEM
 # see: http://docs.ganeti.org/ganeti/master/html/design-x509-ca.html
 
 def get_extension(cert, short_name, default=None):
-    return None
+    # For some reason not all certs have extensions... And if they don't, they
+    # also have no 'get_extension_count' method.
+    if not hasattr(cert, "get_extension_count"):
+        return None
     for i in range(cert.get_extension_count()):
         extension = cert.get_extension(i)
         if extension.get_short_name() == short_name:
