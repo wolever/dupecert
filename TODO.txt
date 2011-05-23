@@ -1,0 +1,3 @@
+- Cache certificates (ie, so that we don't need to generate a new one on every request)
+- Handle SSL errors (see TODO in '_read_write' in PythonProxy.py)
+- Clean up _start_mitm in PythonProxy.py
